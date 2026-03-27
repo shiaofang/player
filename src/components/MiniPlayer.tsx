@@ -1,7 +1,7 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useCallback } from 'react';
 import {
-  View, Text, Image, TouchableOpacity, StyleSheet,
-  Animated, PanResponder, Dimensions, Platform,
+  View, Text, Image, StyleSheet,
+  Animated, PanResponder, Dimensions, Platform, Pressable,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
@@ -43,12 +43,21 @@ export default function MiniPlayer() {
     })
   ).current;
 
+  const handleTogglePlay = useCallback((e: any) => {
+    e.stopPropagation();
+    togglePlay();
+  }, [togglePlay]);
+
+  const handlePlayNext = useCallback((e: any) => {
+    e.stopPropagation();
+    playNext();
+  }, [playNext]);
+
   if (!currentTrack) return null;
 
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={() => setShowNowPlaying(true)}
-      activeOpacity={1}
       style={styles.wrapper}
     >
       <Animated.View
@@ -65,15 +74,15 @@ export default function MiniPlayer() {
             <Text style={styles.title} numberOfLines={1}>{currentTrack.title}</Text>
             <Text style={styles.artist} numberOfLines={1}>{currentTrack.artist}</Text>
           </View>
-          <TouchableOpacity onPress={togglePlay} style={styles.btn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <Pressable onPress={handleTogglePlay} style={styles.btn} hitSlop={8}>
             <Ionicons name={isPlaying ? 'pause' : 'play'} size={22} color={Colors.text} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={playNext} style={styles.btn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          </Pressable>
+          <Pressable onPress={handlePlayNext} style={styles.btn} hitSlop={8}>
             <Ionicons name="play-skip-forward-sharp" size={22} color={Colors.text} />
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </Animated.View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 

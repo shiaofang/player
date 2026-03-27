@@ -35,6 +35,7 @@ const PlayerContext = createContext<PlayerContextType | null>(null);
 
 export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const soundRef = useRef<Audio.Sound | null>(null);
+  const isInitialLoad = useRef(false);
   const stateRef = useRef<PlayerState>({
     currentTrack: null,
     queue: TRACKS,
@@ -76,19 +77,32 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         await soundRef.current.unloadAsync();
         soundRef.current = null;
       }
+      isInitialLoad.current = true;
       setState({ isLoading: true, position: 0 });
 
       const { sound } = await Audio.Sound.createAsync(
         { uri: track.audioUrl },
-        { shouldPlay: true, volume: stateRef.current.volume },
+        {
+          shouldPlay: true,
+          volume: stateRef.current.volume,
+          progressUpdateIntervalMillis: 500,
+        },
         (status: AVPlaybackStatus) => {
           if (!status.isLoaded) return;
-          setState({
+
+          const patch: Partial<PlayerState> = {
             isPlaying: status.isPlaying,
-            duration: status.durationMillis ? status.durationMillis / 1000 : stateRef.current.duration,
             position: status.positionMillis / 1000,
-            isLoading: status.isBuffering,
-          });
+          };
+          if (status.durationMillis) {
+            patch.duration = status.durationMillis / 1000;
+          }
+          if (isInitialLoad.current && !status.isBuffering) {
+            patch.isLoading = false;
+            isInitialLoad.current = false;
+          }
+          setState(patch);
+
           if (status.didJustFinish) {
             const { repeatMode, isShuffle, queueIndex, queue } = stateRef.current;
             if (repeatMode === 'one') {
@@ -108,9 +122,11 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       );
       soundRef.current = sound;
       setState({ isLoading: false, isPlaying: true });
+      isInitialLoad.current = false;
     } catch (e) {
       console.log('Audio load error:', e);
       setState({ isLoading: false });
+      isInitialLoad.current = false;
     }
   }, [setState]);
 
@@ -128,14 +144,18 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
   const togglePlay = useCallback(async () => {
     if (!soundRef.current) return;
+    const wasPlaying = stateRef.current.isPlaying;
+    setState({ isPlaying: !wasPlaying });
     try {
-      if (stateRef.current.isPlaying) {
+      if (wasPlaying) {
         await soundRef.current.pauseAsync();
       } else {
         await soundRef.current.playAsync();
       }
-    } catch {}
-  }, []);
+    } catch {
+      setState({ isPlaying: wasPlaying });
+    }
+  }, [setState]);
 
   const playNext = useCallback(async () => {
     const { queue, queueIndex, isShuffle } = stateRef.current;

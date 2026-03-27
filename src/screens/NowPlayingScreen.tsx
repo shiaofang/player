@@ -1,7 +1,7 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import {
   View, Text, Image, StyleSheet, TouchableOpacity,
-  Animated, Dimensions, PanResponder, Platform,
+  Animated, Dimensions, PanResponder,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,8 +20,13 @@ export default function NowPlayingScreen() {
     currentTrack, isPlaying, isLoading, duration, position,
     togglePlay, playNext, playPrev, seekTo,
     isShuffle, toggleShuffle, repeatMode, toggleRepeat,
-    setShowNowPlaying,
+    setShowNowPlaying, volume, setVolume,
   } = usePlayer();
+
+  const seekingRef = useRef(false);
+  const [seekValue, setSeekValue] = useState(0);
+
+  const displayPosition = seekingRef.current ? seekValue : position;
 
   const artworkScale = useRef(new Animated.Value(isPlaying ? 1 : 0.85)).current;
   const slideY = useRef(new Animated.Value(height)).current;
@@ -44,9 +49,26 @@ export default function NowPlayingScreen() {
     }).start();
   }, [isPlaying]);
 
+  const onSeekStart = useCallback(() => {
+    seekingRef.current = true;
+    setSeekValue(position);
+  }, [position]);
+
+  const onSeekChange = useCallback((val: number) => {
+    setSeekValue(val);
+  }, []);
+
+  const onSeekComplete = useCallback((val: number) => {
+    seekTo(val);
+    seekingRef.current = false;
+  }, [seekTo]);
+
   const panResponder = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: (_, g) => g.dy > 10 && Math.abs(g.dy) > Math.abs(g.dx),
+      onMoveShouldSetPanResponder: (_, g) => {
+        if (seekingRef.current) return false;
+        return g.dy > 10 && Math.abs(g.dy) > Math.abs(g.dx);
+      },
       onPanResponderMove: (_, g) => {
         if (g.dy > 0) slideY.setValue(g.dy);
       },
@@ -119,15 +141,17 @@ export default function NowPlayingScreen() {
             style={styles.slider}
             minimumValue={0}
             maximumValue={duration || 1}
-            value={position}
-            onSlidingComplete={seekTo}
+            value={displayPosition}
+            onSlidingStart={onSeekStart}
+            onValueChange={onSeekChange}
+            onSlidingComplete={onSeekComplete}
             minimumTrackTintColor={Colors.text}
             maximumTrackTintColor="rgba(255,255,255,0.3)"
             thumbTintColor={Colors.text}
           />
           <View style={styles.timeRow}>
-            <Text style={styles.timeText}>{formatDuration(Math.floor(position))}</Text>
-            <Text style={styles.timeText}>-{formatDuration(Math.max(0, Math.floor(duration - position)))}</Text>
+            <Text style={styles.timeText}>{formatDuration(Math.floor(displayPosition))}</Text>
+            <Text style={styles.timeText}>-{formatDuration(Math.max(0, Math.floor(duration - displayPosition)))}</Text>
           </View>
         </View>
 
@@ -188,7 +212,8 @@ export default function NowPlayingScreen() {
               style={styles.volumeSlider}
               minimumValue={0}
               maximumValue={1}
-              value={1}
+              value={volume}
+              onSlidingComplete={setVolume}
               minimumTrackTintColor={Colors.text}
               maximumTrackTintColor="rgba(255,255,255,0.3)"
               thumbTintColor={Colors.text}

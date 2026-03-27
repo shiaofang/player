@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
-  Image, FlatList, Dimensions,
+  Image, Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -40,62 +40,50 @@ export default function HomeScreen() {
 
         {/* Recently Played */}
         <Section title="Recently Played">
-          <FlatList
-            data={TRACKS.slice(0, 6)}
-            keyExtractor={i => i.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.listPadding}
-            renderItem={({ item }) => (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.listPadding}>
+            {TRACKS.slice(0, 6).map(item => (
               <AlbumCard
+                key={item.id}
                 artwork={item.artwork}
                 title={item.title}
                 subtitle={item.artist}
                 size={130}
                 onPress={() => playTrack(item, TRACKS)}
               />
-            )}
-          />
+            ))}
+          </ScrollView>
         </Section>
 
         {/* Featured Albums */}
         <Section title="New Releases">
-          <FlatList
-            data={ALBUMS}
-            keyExtractor={i => i.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.listPadding}
-            renderItem={({ item }) => (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.listPadding}>
+            {ALBUMS.map(item => (
               <AlbumCard
+                key={item.id}
                 artwork={item.artwork}
                 title={item.title}
                 subtitle={item.artist}
                 size={150}
                 onPress={() => playTrack(item.tracks[0], item.tracks)}
               />
-            )}
-          />
+            ))}
+          </ScrollView>
         </Section>
 
         {/* Playlists */}
         <Section title="Made For You">
-          <FlatList
-            data={PLAYLISTS}
-            keyExtractor={i => i.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.listPadding}
-            renderItem={({ item }) => (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.listPadding}>
+            {PLAYLISTS.map(item => (
               <AlbumCard
+                key={item.id}
                 artwork={item.artwork}
                 title={item.title}
                 subtitle={item.curator || 'Playlist'}
                 size={160}
                 onPress={() => playTrack(item.tracks[0], item.tracks)}
               />
-            )}
-          />
+            ))}
+          </ScrollView>
         </Section>
 
         {/* Top Tracks */}

@@ -1,7 +1,7 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
-  View, Text, TextInput, ScrollView, FlatList,
-  StyleSheet, TouchableOpacity, Image,
+  View, Text, TextInput, ScrollView,
+  StyleSheet, TouchableOpacity, Image, Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -50,7 +50,7 @@ export default function SearchScreen() {
             )}
           </View>
           {(focused || query.length > 0) && (
-            <TouchableOpacity onPress={() => { setQuery(''); setFocused(false); }} style={styles.cancelBtn}>
+            <TouchableOpacity onPress={() => { setQuery(''); setFocused(false); Keyboard.dismiss(); }} style={styles.cancelBtn}>
               <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
           )}
@@ -112,22 +112,18 @@ function BrowseContent() {
       </View>
 
       <Text style={[styles.browseTitle, { marginTop: 24 }]}>Featured Albums</Text>
-      <FlatList
-        data={ALBUMS}
-        keyExtractor={i => i.id}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16 }}
-        renderItem={({ item }) => (
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16 }}>
+        {ALBUMS.map(item => (
           <AlbumCard
+            key={item.id}
             artwork={item.artwork}
             title={item.title}
             subtitle={item.artist}
             size={140}
             onPress={() => playTrack(item.tracks[0], item.tracks)}
           />
-        )}
-      />
+        ))}
+      </ScrollView>
     </ScrollView>
   );
 }
