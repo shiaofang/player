@@ -45,14 +45,14 @@
 | 框架 | React Native 0.81 + Expo SDK 54 |
 | 语言 | TypeScript 5.9 |
 | UI 框架 | React 19 |
-| 导航 | React Navigation 7（Bottom Tabs） |
+| 导航 | Expo Router 6（文件路由） |
 | 音频 | expo-av 16 |
 | 动画 | React Native Animated API |
 | 手势 | PanResponder（下滑关闭、左滑切歌） |
 | 视觉效果 | expo-blur、expo-linear-gradient |
 | 图标 | @expo/vector-icons（Ionicons） |
 | 进度/音量条 | @react-native-community/slider |
-| 状态管理 | React Context + useRef（全局播放器状态） |
+| 状态管理 | Zustand（全局播放器状态） |
 | 安全区域 | react-native-safe-area-context |
 
 ---
@@ -61,25 +61,24 @@
 
 ```
 rnmusic/
-├── App.tsx                        # 根组件，注入 PlayerProvider
-├── index.ts                       # Expo 入口，registerRootComponent
 ├── app.json                       # Expo 配置
 ├── tsconfig.json
 ├── package.json
-└── src/
-    ├── context/
-    │   └── PlayerContext.tsx      # 全局播放器状态与音频控制逻辑
-    ├── navigation/
-    │   └── AppNavigator.tsx       # NavigationContainer + 底部 Tab 导航 + 浮层管理
-    ├── screens/
-    │   ├── HomeScreen.tsx         # 首页：Banner、各横向滚动列表、热门榜单
-    │   ├── SearchScreen.tsx       # 搜索页：实时过滤 + 分类浏览
-    │   ├── LibraryScreen.tsx      # 曲库页：四个 Tab 子视图
-    │   └── NowPlayingScreen.tsx   # 全屏播放器：封面动画、Slider、控制栏
+├── app/                           # Expo Router 路由层
+│   ├── _layout.tsx                # 根布局：GestureHandler / SafeArea / 浮层管理
+│   └── (tabs)/
+│       ├── _layout.tsx            # Tab 栏样式与图标配置
+│       ├── index.tsx              # 首页：Banner、各横向滚动列表、热门榜单
+│       ├── search.tsx             # 搜索页：实时过滤 + 分类浏览
+│       └── library.tsx            # 曲库页：四个 Tab 子视图
+└── src/                           # 业务逻辑层
     ├── components/
     │   ├── MiniPlayer.tsx         # 悬浮迷你播放器（左滑切歌、点击展开）
+    │   ├── NowPlayingScreen.tsx   # 全屏播放器：封面动画、Slider、控制栏
     │   ├── TrackItem.tsx          # 歌曲行组件（支持播放动画指示条）
     │   └── AlbumCard.tsx          # 封面卡片组件
+    ├── store/
+    │   └── playerStore.ts         # Zustand 全局播放器状态与音频控制逻辑
     ├── data/
     │   └── mockData.ts            # 歌曲、专辑、艺人、歌单、曲风 Mock 数据
     └── theme/
@@ -121,26 +120,35 @@ npm run ios
 
 ### 播放器状态管理
 
-全局状态集中在 `PlayerContext.tsx`，通过 React Context 向所有组件透传。为避免异步回调中闭包引用过期 state，同时维护了一个 `stateRef` 始终指向最新状态：
+全局状态由 `src/store/playerStore.ts` 通过 Zustand 管理，无需 Provider 包裹，任意组件直接用 `usePlayer()` 订阅所需状态。
+
+音频实例（`soundRef`）和加载标记（`isInitialLoad`）作为模块级变量存在，不触发 React 重渲染：
 
 ```
-PlayerProvider
-  ├── soundRef         — expo-av Sound 实例
-  ├── stateRef         — 供回调读取的最新状态镜像
-  └── state (useState) — 驱动 UI 重渲染的响应式状态
+playerStore.ts
+  ├── soundRef         — expo-av Sound 实例（模块级变量）
+  ├── isInitialLoad    — 首次加载标记（模块级变量）
+  └── usePlayer        — Zustand store（驱动 UI 重渲染）
 ```
+
+在异步回调中直接用 `usePlayer.getState()` / `usePlayer.setState()` 读写状态，天然避免了 React 闭包陈旧值问题。
 
 ### 导航与浮层结构
 
-NowPlayingScreen 和 MiniPlayer 均**不是** Navigation Screen，而是直接渲染在 `NavigationContainer` 外层的 View 之上，通过 `showNowPlaying` flag 控制显示：
+项目使用 Expo Router 文件路由，`app/_layout.tsx` 作为根布局负责浮层管理：
 
 ```
-App
-└── NavigationContainer
-    ├── Tab.Navigator（Home / Search / Library）
-    ├── MiniPlayer         — 当 currentTrack 存在且未全屏时显示
-    └── NowPlayingScreen   — 当 showNowPlaying 为 true 时覆盖全屏
+expo-router/entry
+└── app/_layout.tsx（根布局 / GestureHandler / SafeArea）
+    ├── app/(tabs)/_layout.tsx（Tab 栏配置）
+    │   ├── app/(tabs)/index.tsx      — Home Tab
+    │   ├── app/(tabs)/search.tsx     — Search Tab
+    │   └── app/(tabs)/library.tsx    — Library Tab
+    ├── MiniPlayer      — 当 currentTrack 存在且未全屏时显示
+    └── NowPlayingScreen — 当 showNowPlaying 为 true 时覆盖全屏
 ```
+
+`MiniPlayer` 和 `NowPlayingScreen` 不是路由页面，而是叠在 `<Slot />` 上方的条件渲染浮层。
 
 ### 进度条防抖方案
 
