@@ -1,22 +1,20 @@
 import React, { useState } from 'react';
 import {
   View, Text, ScrollView, FlatList, StyleSheet,
-  TouchableOpacity, Image, SectionList,
+  TouchableOpacity, Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import Colors from '../theme/colors';
-import { TRACKS, ALBUMS, ARTISTS, PLAYLISTS } from '../data/mockData';
-import { usePlayer } from '../context/PlayerContext';
-import AlbumCard from '../components/AlbumCard';
-import TrackItem from '../components/TrackItem';
+import Colors from '../../src/theme/colors';
+import { TRACKS, ALBUMS, ARTISTS, PLAYLISTS } from '../../src/data/mockData';
+import { usePlayer } from '../../src/store/playerStore';
+import TrackItem from '../../src/components/TrackItem';
 
 type Tab = 'Playlists' | 'Albums' | 'Artists' | 'Songs';
 const TABS: Tab[] = ['Playlists', 'Albums', 'Artists', 'Songs'];
 
 export default function LibraryScreen() {
   const [activeTab, setActiveTab] = useState<Tab>('Playlists');
-  const { playTrack } = usePlayer();
 
   return (
     <View style={styles.root}>
@@ -33,7 +31,6 @@ export default function LibraryScreen() {
           </View>
         </View>
 
-        {/* Tabs */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -190,7 +187,6 @@ const styles = StyleSheet.create({
   tabTextActive: {
     color: '#fff',
   },
-  // Playlists
   playlistGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -218,7 +214,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.textTertiary,
   },
-  // Albums
   albumGrid: {
     padding: 16,
     paddingBottom: 120,
@@ -243,7 +238,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.textTertiary,
   },
-  // Artists
   artistRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -270,7 +264,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.textTertiary,
   },
-  // Songs
   sortRow: {
     flexDirection: 'row',
     alignItems: 'center',

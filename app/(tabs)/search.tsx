@@ -5,10 +5,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import Colors from '../theme/colors';
-import { TRACKS, ALBUMS, GENRES, Track } from '../data/mockData';
-import { usePlayer } from '../context/PlayerContext';
-import AlbumCard from '../components/AlbumCard';
+import Colors from '../../src/theme/colors';
+import { TRACKS, ALBUMS, GENRES, Track } from '../../src/data/mockData';
+import { usePlayer } from '../../src/store/playerStore';
+import AlbumCard from '../../src/components/AlbumCard';
 
 export default function SearchScreen() {
   const [query, setQuery] = useState('');

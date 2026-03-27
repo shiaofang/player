@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
-import { usePlayer } from '../context/PlayerContext';
+import { usePlayer } from '../store/playerStore';
 import Colors from '../theme/colors';
 
 const { width } = Dimensions.get('window');

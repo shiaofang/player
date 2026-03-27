@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Track, formatDuration } from '../data/mockData';
-import { usePlayer } from '../context/PlayerContext';
+import { usePlayer } from '../store/playerStore';
 import Colors from '../theme/colors';
 
 interface Props {

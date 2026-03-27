@@ -5,10 +5,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
-import { usePlayer } from '../context/PlayerContext';
+import { usePlayer } from '../store/playerStore';
 import Colors from '../theme/colors';
 import { formatDuration } from '../data/mockData';
 
@@ -99,12 +98,10 @@ export default function NowPlayingScreen() {
       />
 
       <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-        {/* Drag Handle */}
         <View {...panResponder.panHandlers} style={styles.dragArea}>
           <View style={styles.dragHandle} />
         </View>
 
-        {/* Top Bar */}
         <View style={styles.topBar}>
           <TouchableOpacity onPress={() => setShowNowPlaying(false)} style={styles.topBtn}>
             <Ionicons name="chevron-down" size={28} color={Colors.text} />
@@ -117,14 +114,12 @@ export default function NowPlayingScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Artwork */}
         <View style={styles.artworkContainer}>
           <Animated.View style={[styles.artworkShadow, { transform: [{ scale: artworkScale }] }]}>
             <Image source={{ uri: currentTrack.artwork }} style={styles.artwork} />
           </Animated.View>
         </View>
 
-        {/* Track Info */}
         <View style={styles.trackInfo}>
           <View style={styles.trackInfoLeft}>
             <Text style={styles.trackTitle} numberOfLines={1}>{currentTrack.title}</Text>
@@ -135,7 +130,6 @@ export default function NowPlayingScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Progress Slider */}
         <View style={styles.progressContainer}>
           <Slider
             style={styles.slider}
@@ -155,14 +149,9 @@ export default function NowPlayingScreen() {
           </View>
         </View>
 
-        {/* Controls */}
         <View style={styles.controls}>
           <TouchableOpacity onPress={toggleShuffle} style={styles.controlBtn}>
-            <Ionicons
-              name="shuffle"
-              size={22}
-              color={isShuffle ? Colors.primary : Colors.text}
-            />
+            <Ionicons name="shuffle" size={22} color={isShuffle ? Colors.primary : Colors.text} />
             {isShuffle && <View style={styles.activeDot} />}
           </TouchableOpacity>
 
@@ -170,11 +159,7 @@ export default function NowPlayingScreen() {
             <Ionicons name="play-skip-back" size={34} color={Colors.text} />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={togglePlay}
-            style={styles.playPauseBtn}
-            activeOpacity={0.85}
-          >
+          <TouchableOpacity onPress={togglePlay} style={styles.playPauseBtn} activeOpacity={0.85}>
             {isLoading ? (
               <ActivityIndicatorIcon />
             ) : (
@@ -201,7 +186,6 @@ export default function NowPlayingScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Bottom Actions */}
         <View style={styles.bottomActions}>
           <TouchableOpacity style={styles.bottomBtn}>
             <Ionicons name="radio" size={22} color={Colors.text} />
