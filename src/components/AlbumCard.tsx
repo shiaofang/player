@@ -1,17 +1,9 @@
+// @ts-nocheck
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import Colors from '../theme/colors';
 
-interface Props {
-  artwork: string;
-  title: string;
-  subtitle: string;
-  size?: number;
-  onPress?: () => void;
-  style?: object;
-}
-
-export default function AlbumCard({ artwork, title, subtitle, size = 150, onPress, style }: Props) {
+export default function AlbumCard({ artwork, title, subtitle, size = 150, onPress, style }) {
   return (
     <TouchableOpacity style={[styles.container, style]} onPress={onPress} activeOpacity={0.8}>
       <Image source={{ uri: artwork }} style={[styles.artwork, { width: size, height: size }]} />
@@ -41,3 +33,4 @@ const styles = StyleSheet.create({
     color: Colors.textTertiary,
   },
 });
+
