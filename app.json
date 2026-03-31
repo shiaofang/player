@@ -2,6 +2,11 @@
   "expo": {
     "name": "rnmusic",
     "slug": "rnmusic",
+    "extra": {
+      "eas": {
+        "projectId": "a24389f0-18c5-49b9-821d-88607d798f8c"
+      }
+    },
     "scheme": "rnmusic",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -13,9 +18,15 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.saf66666.rnmusic",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "com.saf66666.rnmusic",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
